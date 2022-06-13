@@ -153,6 +153,27 @@ function getTestParentSpan (tracer) {
   })
 }
 
+function getTestSessionCommonTags (command, version) {
+  return {
+    [SPAN_TYPE]: 'test_session_end',
+    [TEST_TYPE]: 'test',
+    [RESOURCE_NAME]: `test_session.${command}`,
+    [TEST_FRAMEWORK_VERSION]: version,
+    [LIBRARY_VERSION]: ddTraceVersion
+  }
+}
+
+function getTestSuiteCommonTags (version, name) {
+  return {
+    [SPAN_TYPE]: 'test_suite_end', // to be changed
+    [TEST_TYPE]: 'test', // to be changed
+    [RESOURCE_NAME]: `test_suite.${name}`,
+    [TEST_FRAMEWORK_VERSION]: version,
+    [LIBRARY_VERSION]: ddTraceVersion,
+    [TEST_SUITE]: name
+  }
+}
+
 function getTestCommonTags (name, suite, version) {
   return {
     [SPAN_TYPE]: 'test',
