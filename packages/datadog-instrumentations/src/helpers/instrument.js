@@ -18,7 +18,7 @@ const channel = exports.channel = function (name) {
   return ch
 }
 
-const loadedChannel = channel('dd-trace:instrumentation:loaded')
+const loadChannel = channel('dd-trace:instrumentation:load')
 
 exports.addHook = function addHook ({ name, versions, file }, hook) {
   const fullFilename = filename(name, file)
@@ -35,11 +35,9 @@ exports.addHook = function addHook ({ name, versions, file }, hook) {
 
       if (matchVersion(version, versions)) {
         try {
-          const wrappedExports = hook(moduleExports)
+          loadChannel.publish({ name, version, file })
 
-          loadedChannel.publish({ name, version, file })
-
-          return wrappedExports
+          return hook(moduleExports)
         } catch (e) {
           log.error(e)
           return moduleExports

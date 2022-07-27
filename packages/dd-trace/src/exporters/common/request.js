@@ -6,8 +6,8 @@ const log = require('../../log')
 const docker = require('./docker')
 const { storage } = require('../../../../datadog-core')
 
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
+const httpAgent = new http.Agent({ keepAlive: true, maxTotalSockets: 1 })
+const httpsAgent = new https.Agent({ keepAlive: true, maxTotalSockets: 1 })
 const containerId = docker.id()
 
 function request (data, options, keepAlive, callback) {
