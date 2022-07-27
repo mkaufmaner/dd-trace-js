@@ -10,13 +10,15 @@ const log = require('../../../dd-trace/src/log')
 
 const pathSepExpr = new RegExp(`\\${path.sep}`, 'g')
 const channelMap = {}
-exports.channel = function channel (name) {
+const channel = exports.channel = function (name) {
   const maybe = channelMap[name]
   if (maybe) return maybe
   const ch = dc.channel(name)
   channelMap[name] = ch
   return ch
 }
+
+const loadedChannel = channel('dd-trace:instrumentation:loaded')
 
 exports.addHook = function addHook ({ name, versions, file }, hook) {
   const fullFilename = filename(name, file)
@@ -28,12 +30,24 @@ exports.addHook = function addHook ({ name, versions, file }, hook) {
       return moduleExports
     }
 
-    try {
-      return hook(moduleExports)
-    } catch (e) {
-      log.error(e)
-      return moduleExports
+    if (moduleName === fullFilename) {
+      const version = getVersion(moduleBaseDir)
+
+      if (matchVersion(version, versions)) {
+        try {
+          const wrappedExports = hook(moduleExports)
+
+          loadedChannel.publish({ name, version, file })
+
+          return wrappedExports
+        } catch (e) {
+          log.error(e)
+          return moduleExports
+        }
+      }
     }
+
+    return moduleExports
   })
 }
 
