@@ -26,10 +26,6 @@ exports.addHook = function addHook ({ name, versions, file }, hook) {
   Hook([name], (moduleExports, moduleName, moduleBaseDir) => {
     moduleName = moduleName.replace(pathSepExpr, '/')
 
-    if (moduleName !== fullFilename || !matchVersion(getVersion(moduleBaseDir), versions)) {
-      return moduleExports
-    }
-
     if (moduleName === fullFilename) {
       const version = getVersion(moduleBaseDir)
 
