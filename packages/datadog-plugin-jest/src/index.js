@@ -68,9 +68,9 @@ class JestPlugin extends Plugin {
       this.tracer._exporter._writer.flush()
     })
 
-    // Test suites are run in different processes from the jest's main one.
+    // Test suites can be run in a different process from jest's main one.
     // This subscriber changes the configuration objects from jest to inject the trace id
-    // of the test session to the processes that run the test suites and the test command
+    // of the test session to the processes that run the test suites.
     this.addSub('ci:jest:session:configuration', configs => {
       configs.forEach(config => {
         config._ddTestSessionId = this.testSessionSpan.context()._traceId.toString('hex')
@@ -86,6 +86,8 @@ class JestPlugin extends Plugin {
       })
 
       this.testSessionId = testSessionId
+      this.command = testCommand
+
       const testSuiteMetadata = getTestSuiteCommonTags(testCommand, this.tracer._version, testSuite)
 
       this.testSuiteSpan = this.tracer.startSpan('jest.test_suite', {

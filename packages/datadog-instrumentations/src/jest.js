@@ -100,8 +100,7 @@ function getWrappedEnvironment (BaseEnvironment) {
             name: getJestTestName(event.test),
             suite: this.testSuite,
             runner: 'jest-circus',
-            testParameters,
-            testSessionId: this._ddTestSessionId
+            testParameters
           })
           originalTestFns.set(event.test, event.test.fn)
           event.test.fn = asyncResource.bind(event.test.fn)

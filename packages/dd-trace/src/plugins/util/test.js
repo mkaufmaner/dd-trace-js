@@ -153,29 +153,6 @@ function getTestParentSpan (tracer) {
   })
 }
 
-function getTestSessionCommonTags (command, version) {
-  return {
-    [SPAN_TYPE]: 'test_session_end',
-    [TEST_TYPE]: 'test',
-    [RESOURCE_NAME]: `test_session.${command}`,
-    [TEST_FRAMEWORK_VERSION]: version,
-    [LIBRARY_VERSION]: ddTraceVersion,
-    [TEST_COMMAND]: command
-  }
-}
-
-function getTestSuiteCommonTags (command, version, testSuite) {
-  return {
-    [SPAN_TYPE]: 'test_suite_end',
-    [TEST_TYPE]: 'test',
-    [RESOURCE_NAME]: `test_suite.${testSuite}`,
-    [TEST_FRAMEWORK_VERSION]: version,
-    [LIBRARY_VERSION]: ddTraceVersion,
-    [TEST_SUITE]: testSuite,
-    [TEST_COMMAND]: command
-  }
-}
-
 function getTestCommonTags (name, suite, version) {
   return {
     [SPAN_TYPE]: 'test',
@@ -255,4 +232,27 @@ function getCodeOwnersForFilename (filename, entries) {
     }
   }
   return null
+}
+
+function getTestSessionCommonTags (command, version) {
+  return {
+    [SPAN_TYPE]: 'test_session_end',
+    [TEST_TYPE]: 'test',
+    [RESOURCE_NAME]: `test_session.${command}`,
+    [TEST_FRAMEWORK_VERSION]: version,
+    [LIBRARY_VERSION]: ddTraceVersion,
+    [TEST_COMMAND]: command
+  }
+}
+
+function getTestSuiteCommonTags (command, version, testSuite) {
+  return {
+    [SPAN_TYPE]: 'test_suite_end',
+    [TEST_TYPE]: 'test',
+    [RESOURCE_NAME]: `test_suite.${testSuite}`,
+    [TEST_FRAMEWORK_VERSION]: version,
+    [LIBRARY_VERSION]: ddTraceVersion,
+    [TEST_SUITE]: testSuite,
+    [TEST_COMMAND]: command
+  }
 }

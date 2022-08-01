@@ -20,7 +20,10 @@ const {
   ERROR_MESSAGE,
   TEST_PARAMETERS,
   TEST_CODE_OWNERS,
-  LIBRARY_VERSION
+  LIBRARY_VERSION,
+  TEST_COMMAND,
+  TEST_SUITE_ID,
+  TEST_SESSION_ID
 } = require('../../dd-trace/src/plugins/util/test')
 
 const { version: ddTraceVersion } = require('../../../package.json')
@@ -282,12 +285,19 @@ describe('Plugin', function () {
           return agent.use(trace => {
             const span = trace[0].find(span => span.type === type)
             expect(span.meta[TEST_STATUS]).to.equal(status)
+            if (type === 'test_session_end') {
+              expect(span.meta[TEST_COMMAND]).not.to.equal(undefined)
+            }
             if (type === 'test_suite_end') {
               expect(span.meta[TEST_SUITE]).to.equal(suite)
+              expect(span.meta[TEST_COMMAND]).not.to.equal(undefined)
             }
             if (type === 'test') {
               expect(span.meta[TEST_SUITE]).to.equal(suite)
               expect(span.meta[TEST_NAME]).to.equal(name)
+              expect(span.meta[TEST_COMMAND]).not.to.equal(undefined)
+              expect(span.meta[TEST_SUITE_ID]).not.to.equal(undefined)
+              expect(span.meta[TEST_SESSION_ID]).not.to.equal(undefined)
             }
           })
         })
