@@ -69,15 +69,6 @@ function getWrappedEnvironment (BaseEnvironment) {
       }
     }
 
-    async setup () {
-      testSuiteStartCh.publish({
-        testSuite: this.testSuite,
-        testSessionId: this._ddTestSessionId,
-        testCommand: this._ddTestCommand
-      })
-      return super.setup()
-    }
-
     async handleTestEvent (event, state) {
       if (super.handleTestEvent) {
         await super.handleTestEvent(event, state)
@@ -156,13 +147,19 @@ addHook({
   file: 'build/cli/index.js',
   versions: ['>=24.8.0']
 }, cli => {
-  const wrapped = shimmer.wrap(cli, 'runCLI', runCLI => async function () {
+  const wrapped = shimmer.wrap(cli, 'runCLI', runCLI => function () {
     const processArgv = process.argv.slice(2).join(' ')
-    testSessionStartCh.publish(`jest ${processArgv}`)
-    const result = await runCLI.apply(this, arguments)
-    const { results: { success } } = result
-    testSessionFinishCh.publish(success ? 'pass' : 'fail')
-    return result
+    const asyncResource = new AsyncResource('bound-anonymous-fn')
+    asyncResource.runInAsyncScope(() => {
+      testSessionStartCh.publish(`jest ${processArgv}`)
+    })
+    return runCLI.apply(this, arguments).then(result => {
+      const { results: { success } } = result
+      asyncResource.runInAsyncScope(() => {
+        testSessionFinishCh.publish(success ? 'pass' : 'fail')
+      })
+      return result
+    })
   })
 
   cli.runCLI = wrapped.runCLI
@@ -176,17 +173,29 @@ addHook({
   versions: ['>=24.8.0']
 }, jestAdapter => {
   const adapter = jestAdapter.default ? jestAdapter.default : jestAdapter
-  const newAdapter = shimmer.wrap(adapter, async function () {
-    const suiteResults = await adapter.apply(this, arguments)
-    const { numFailingTests, skipped, failureMessage: errorMessage } = suiteResults
-    let status = 'pass'
-    if (skipped) {
-      status = 'skipped'
-    } else if (numFailingTests !== 0) {
-      status = 'fail'
-    }
-    testSuiteFinish.publish({ status, errorMessage })
-    return suiteResults
+  const newAdapter = shimmer.wrap(adapter, function () {
+    const environment = arguments[2]
+    const asyncResource = new AsyncResource('bound-anonymous-fn')
+    asyncResource.runInAsyncScope(() => {
+      testSuiteStartCh.publish({
+        testSuite: environment.testSuite,
+        testSessionId: environment._ddTestSessionId,
+        testCommand: environment._ddTestCommand
+      })
+    })
+    return adapter.apply(this, arguments).then(suiteResults => {
+      const { numFailingTests, skipped, failureMessage: errorMessage } = suiteResults
+      let status = 'pass'
+      if (skipped) {
+        status = 'skipped'
+      } else if (numFailingTests !== 0) {
+        status = 'fail'
+      }
+      asyncResource.runInAsyncScope(() => {
+        testSuiteFinish.publish({ status, errorMessage })
+      })
+      return suiteResults
+    })
   })
   if (jestAdapter.default) {
     jestAdapter.default = newAdapter
@@ -229,7 +238,7 @@ addHook({
   versions: ['>=24.8.0']
 }, getTestEnvironment)
 
-// TODO: support for jest-jasmine
+// TODO: support for jest-jasmine's test suites
 addHook({
   name: 'jest-jasmine2',
   versions: ['>=24.8.0'],
