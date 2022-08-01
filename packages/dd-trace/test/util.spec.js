@@ -62,7 +62,7 @@ describe('util', () => {
     })
   })
 
-  it.only('parseRules works', () => {
+  it('parseRules works', () => {
     const goodExpected = [
       { 'service': 'usersvc', 'name': 'healthcheck', 'sampleRate': 0.0 },
       { 'service': 'usersvc', 'sampleRate': 0.5 },
