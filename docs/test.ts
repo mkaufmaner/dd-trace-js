@@ -40,8 +40,7 @@ tracer.init({
   url: 'http://localhost',
   runtimeMetrics: true,
   ingestion: {
-    sampleRate: 0.5,
-    rateLimit: 500
+    sampleRate: 0.5
   },
   experimental: {
     b3: true,

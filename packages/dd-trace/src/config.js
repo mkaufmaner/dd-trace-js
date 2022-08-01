@@ -7,7 +7,7 @@ const path = require('path')
 const pkg = require('./pkg')
 const coalesce = require('koalas')
 const tagger = require('./tagger')
-const { isTrue, isFalse } = require('./util')
+const { isTrue, isFalse, parseRules } = require('./util')
 const uuid = require('crypto-randomuuid')
 
 const fromEntries = Object.fromEntries || (entries =>
@@ -189,8 +189,8 @@ ken|consumer_?(?:id|key|secret)|sign(?:ed|ature)?|auth(?:entication|orization)?)
         ingestion.sampleRate,
         process.env.DD_TRACE_SAMPLE_RATE
       ),
-      rateLimit: coalesce(options.rateLimit, ingestion.rateLimit, process.env.DD_TRACE_RATE_LIMIT),
-      samplingRules: coalesce(options.samplingRules, process.env.DD_TRACE_SAMPLING_RULES)
+      rateLimit: coalesce(options.rateLimit, process.env.DD_TRACE_RATE_LIMIT),
+      samplingRules: coalesce(options.samplingRules, parseRules(process.env.DD_TRACE_SAMPLING_RULES))
     }
 
     const inAWSLambda = process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined

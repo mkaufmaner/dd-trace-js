@@ -26,10 +26,10 @@ const defaultSampler = new Sampler(AUTO_KEEP)
 class PrioritySampler {
   constructor (env, { sampleRate, rateLimit = 100, samplingRules = [] } = {}) {
     this._env = env
-    this._samplingRules = this._normalizeRules(samplingRules, sampleRate)
+    this._rules = this._normalizeRules(samplingRules, sampleRate)
     this._limiter = new RateLimiter(rateLimit)
 
-    setSamplingRules(this._samplingRules)
+    setSamplingRules(this._rules)
 
     this.update({})
   }
@@ -145,8 +145,8 @@ class PrioritySampler {
   }
 
   _findRule (context) {
-    for (let i = 0, l = this._samplingRules.length; i < l; i++) {
-      if (this._matchRule(context, this._samplingRules[i])) return this._samplingRules[i]
+    for (let i = 0, l = this._rules.length; i < l; i++) {
+      if (this._matchRule(context, this._rules[i])) return this._rules[i]
     }
   }
 

@@ -317,11 +317,6 @@ export declare interface TracerOptions {
      * Controls the ingestion sample rate (between 0 and 1) between the agent and the backend.
      */
     sampleRate?: number
-
-    /**
-     * Controls the ingestion rate limit between the agent and the backend.
-     */
-    rateLimit?: number
   };
 
   /**

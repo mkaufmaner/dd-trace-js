@@ -20,8 +20,20 @@ function isError (value) {
   return false
 }
 
+function parseRules (rules) {
+  if (Array.isArray(rules)) return rules
+  if (typeof rules !== 'string') return []
+  try {
+    const parsed = JSON.parse(rules)
+
+    if (!Array.isArray(parsed)) return []
+    else return parsed
+  } catch (e) { return [] }
+}
+
 module.exports = {
   isTrue,
   isFalse,
-  isError
+  isError,
+  parseRules
 }
